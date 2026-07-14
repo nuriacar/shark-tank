@@ -1,0 +1,40 @@
+$ORIGIN shark-tank.local.
+$TTL 300
+
+@       IN      SOA     ns1.shark-tank.local. admin.shark-tank.local. (
+                        2026071401  ; Serial
+                        3600        ; Refresh
+                        900         ; Retry
+                        604800      ; Expire
+                        300 )       ; Minimum TTL
+
+                IN      NS      ns1.shark-tank.local.
+
+ns1             IN      A       172.50.2.11
+ns1             IN      AAAA    fd00:2::11
+web             IN      A       172.50.2.10
+web             IN      AAAA    fd00:2::10
+dns             IN      A       172.50.2.11
+dns             IN      AAAA    fd00:2::11
+secure          IN      A       172.50.2.13
+secure          IN      AAAA    fd00:2::13
+target          IN      A       172.50.2.14
+target          IN      AAAA    fd00:2::14
+echo            IN      A       172.50.2.12
+echo            IN      AAAA    fd00:2::12
+
+www             IN      CNAME   web.shark-tank.local.
+ftp             IN      A       172.50.2.15
+ftp             IN      AAAA    fd00:2::15
+
+mail            IN      MX      10 mail.shark-tank.local.
+                IN      A       172.50.2.16
+                IN      AAAA    fd00:2::16
+smtp            IN      A       172.50.2.16
+smtp            IN      AAAA    fd00:2::16
+udp             IN      A       172.50.2.17
+udp             IN      AAAA    fd00:2::17
+imap            IN      A       172.50.2.18
+imap            IN      AAAA    fd00:2::18
+voip            IN      A       172.50.2.22
+voip            IN      AAAA    fd00:2::22

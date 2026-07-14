@@ -1,0 +1,112 @@
+site_name: shark-tank
+site_description: Docker tabanlı Wireshark eğitim laboratuvarı. 25 modül, 22 pcap, 14 gerçek servis.
+site_url: https://nuriacar.com/shark-tank/
+site_author: Nuri ACAR
+repo_url: https://github.com/nuriacar/shark-tank
+repo_name: nuriacar/shark-tank
+edit_uri: edit/main/docs/
+copyright: Copyright © 2026 Nuri ACAR. All rights reserved.
+
+theme:
+  name: material
+  language: tr
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: grey
+      accent: blue
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: grey
+      accent: light blue
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.png
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nuriacar/shark-tank
+    - icon: fontawesome/brands/linkedin
+      link: https://nuriacar.com
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - include-markdown:
+      encoding: utf-8
+  - search:
+      lang: tr
+
+nav:
+  - Anasayfa: index.md
+  - Başlangıç:
+      - M01 Temeller: modules/module-01.md
+      - M02 Filtreleme: modules/module-02.md
+      - M03 ARP: modules/module-03.md
+      - M04 DHCP: modules/module-04.md
+      - M05 ICMP: modules/module-05.md
+      - M06 Fragmentation: modules/module-06.md
+  - İleri:
+      - M07 IPv6: modules/module-07.md
+      - M08 TCP: modules/module-08.md
+      - M09 TCP Dizi Analizi: modules/module-09.md
+      - M10 UDP: modules/module-10.md
+      - M11 İleri TCP: modules/module-11.md
+      - M12 DNS: modules/module-12.md
+      - M13 HTTP: modules/module-13.md
+      - M14 FTP: modules/module-14.md
+      - M15 Email: modules/module-15.md
+      - M16 TLS: modules/module-16.md
+  - Uzman:
+      - M17 tshark CLI: modules/module-17.md
+      - M18 Gelişmiş Capture: modules/module-18.md
+      - M19 TCP Grafikleri: modules/module-19.md
+      - M20 Performans: modules/module-20.md
+      - M21 WLAN: modules/module-21.md
+      - M22 VoIP: modules/module-22.md
+  - Sentez:
+      - M23 Baseline: modules/module-23.md
+      - M24 Sınav Pratiği: modules/module-24.md
+      - M25 Forensics: modules/module-25.md
+  - Referans:
+      - Filtre Cheat Sheet: referans/filtre-cheat-sheet.md
+      - Kurs Müfredatı: referans/kurs-mufredati.md
+      - Ağ Diyagramı: referans/ag-diyagrami.md
+      - Lab Özeti: referans/lab-ozeti.md

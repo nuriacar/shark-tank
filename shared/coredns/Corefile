@@ -1,0 +1,13 @@
+shark-tank.local:53 {
+    file /etc/coredns/shark-tank.local.zone
+    log
+    errors
+    cache 30
+}
+
+.:53 {
+    forward . 8.8.8.8 8.8.4.4
+    log
+    errors
+    cache 30
+}

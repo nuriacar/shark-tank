@@ -1,0 +1,20 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache \
+    curl \
+    bind-tools \
+    iputils \
+    tcpdump \
+    nmap \
+    nmap-scripts \
+    netcat-openbsd \
+    iproute2 \
+    bash \
+    openssl \
+    drill \
+    sed \
+    coreutils \
+    python3
+
+WORKDIR /pcaps
+CMD ["sleep", "infinity"]

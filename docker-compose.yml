@@ -1,0 +1,347 @@
+networks:
+  shark-tank:
+    name: shark-tank
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.2.0/24
+          gateway: 172.50.2.1
+        - subnet: fd00:2::/64
+          gateway: fd00:2::1
+  shark-tank-dhcp:
+    name: shark-tank-dhcp
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.9.0/24
+          gateway: 172.50.9.1
+
+x-resource-limits: &default-limits
+  deploy:
+    resources:
+      limits:
+        cpus: "0.50"
+        memory: 256M
+      reservations:
+        memory: 64M
+
+services:
+  web:
+    image: nginx:1.27-alpine
+    container_name: shark-tank-web
+    hostname: web
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.10
+        ipv6_address: fd00:2::10
+    volumes:
+      - ./shared/nginx-http/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./shared/nginx-http/html:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  dns:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.dns
+    image: shark-tank-dns:latest
+    container_name: shark-tank-dns
+    hostname: dns
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.11
+        ipv6_address: fd00:2::11
+    volumes:
+      - ./shared/coredns:/etc/coredns:ro
+    command: -conf /etc/coredns/Corefile
+    healthcheck:
+      test: ["CMD-SHELL", "dig @127.0.0.1 shark-tank.local +short >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  tcp-echo:
+    image: alpine/socat:latest
+    container_name: shark-tank-tcp-echo
+    hostname: tcp-echo
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.12
+        ipv6_address: fd00:2::12
+    command: TCP-LISTEN:8080,fork,reuseaddr EXEC:cat
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "echo test | nc -w 1 127.0.0.1 8080 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  https:
+    image: nginx:1.27-alpine
+    container_name: shark-tank-https
+    hostname: https
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.13
+        ipv6_address: fd00:2::13
+    volumes:
+      - ./shared/nginx-https/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./shared/certs:/etc/nginx/certs:ro
+      - ./shared/nginx-http/html:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -skf https://127.0.0.1/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  icmp-target:
+    image: alpine:3.21
+    container_name: shark-tank-icmp-target
+    hostname: icmp-target
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.14
+        ipv6_address: fd00:2::14
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    command: sleep infinity
+
+  ftp:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.ftp
+    image: shark-tank-ftp:latest
+    container_name: shark-tank-ftp
+    hostname: ftp
+    restart: unless-stopped
+    security_opt:
+      - seccomp:unconfined
+    <<: *default-limits
+    environment:
+      - FTP_USER=${FTP_USER:-ftpuser}
+      - FTP_PASS=${FTP_PASS:-ftppass123}
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.15
+        ipv6_address: fd00:2::15
+    volumes:
+      - ./shared/vsftpd/vsftpd.conf:/etc/vsftpd/vsftpd.conf:ro
+      - ftp-data:/home/${FTP_USER:-ftpuser}
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 21 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  client:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.client
+    image: shark-tank-client:latest
+    container_name: shark-tank-client
+    hostname: client
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.100
+        ipv6_address: fd00:2::100
+    volumes:
+      - ./shared/pcaps:/pcaps
+      - ./shared/sip-client.py:/sip-client.py:ro
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      web:
+        condition: service_healthy
+      https:
+        condition: service_healthy
+      dns:
+        condition: service_healthy
+      tcp-echo:
+        condition: service_healthy
+      icmp-target:
+        condition: service_started
+      ftp:
+        condition: service_healthy
+      smtp:
+        condition: service_healthy
+      imap:
+        condition: service_healthy
+      udp-echo:
+        condition: service_healthy
+      voip:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  attacker:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.attacker
+    image: shark-tank-attacker:latest
+    container_name: shark-tank-attacker
+    hostname: attacker
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.200
+        ipv6_address: fd00:2::200
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      web:
+        condition: service_healthy
+      https:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  dhcp-server:
+    image: networkboot/dhcpd:latest
+    container_name: shark-tank-dhcp-server
+    hostname: dhcp-server
+    <<: *default-limits
+    networks:
+      shark-tank-dhcp:
+        ipv4_address: 172.50.9.2
+    volumes:
+      - ./shared/dhcp/dhcpd.conf:/data/dhcpd.conf:ro
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+
+  dhcp-client:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.dhcp-client
+    image: shark-tank-dhcp-client:latest
+    container_name: shark-tank-dhcp-client
+    hostname: dhcp-client
+    <<: *default-limits
+    networks:
+      shark-tank-dhcp:
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./shared/pcaps:/pcaps
+    command: sleep infinity
+
+  smtp:
+    image: axllent/mailpit:v1.21
+    container_name: shark-tank-smtp
+    hostname: smtp
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.16
+        ipv6_address: fd00:2::16
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 1025 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  imap:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.imap
+    image: shark-tank-imap:latest
+    container_name: shark-tank-imap
+    hostname: imap
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.18
+        ipv6_address: fd00:2::18
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 110 && nc -z 127.0.0.1 143 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    expose:
+      - "110"
+      - "143"
+      - "587"
+
+  udp-echo:
+    image: alpine/socat:latest
+    container_name: shark-tank-udp-echo
+    hostname: udp-echo
+    restart: unless-stopped
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.17
+        ipv6_address: fd00:2::17
+    command: UDP-LISTEN:9090,fork,reuseaddr EXEC:cat
+    healthcheck:
+      test: ["CMD-SHELL", "echo test | nc -u -w 1 127.0.0.1 9090 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  voip:
+    build:
+      context: ./shared
+      dockerfile: Dockerfile.voip
+    image: shark-tank-voip:latest
+    container_name: shark-tank-voip
+    hostname: voip
+    <<: *default-limits
+    networks:
+      shark-tank:
+        ipv4_address: 172.50.2.22
+        ipv6_address: fd00:2::22
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "asterisk -rx 'core show version' > /dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    expose:
+      - "5060/udp"
+      - "10000-20000/udp"
+
+volumes:
+  ftp-data:
+    name: shark-tank-ftp-data
