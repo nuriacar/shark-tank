@@ -1,0 +1,16 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache dovecot dovecot-pop3d dovecot-submissiond
+
+RUN mkdir -p /etc/dovecot && \
+    adduser -D -h /home/kullanici kullanici
+
+COPY imap/mail /home/kullanici/mail
+COPY imap/dovecot.conf /etc/dovecot/dovecot.conf
+
+RUN chown -R kullanici:kullanici /home/kullanici/mail && \
+    echo 'kullanici:{SHA512-CRYPT}$6$1mrxQk0Rg9nO3wWv$/UYe6ifRiuqTiDjbfIh6HZQSrCrYl7Csd4jG5D8QJiK/HNWa0vcleWYLOmy7c35845kMjVXL.8zSR.2BX6H7P/' >> /etc/dovecot/users
+
+EXPOSE 110 143
+
+CMD ["dovecot", "-F"]

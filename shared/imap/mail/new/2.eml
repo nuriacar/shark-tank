@@ -1,0 +1,27 @@
+From: phantom@shark-tank.local
+To: target@shark-tank.local
+Subject: Fatura ve rapor ektedir (acil)
+Date: Sat, 06 Jun 2026 10:05:00 +0300
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="ST-BOUNDARY-42"
+
+--ST-BOUNDARY-42
+Content-Type: text/plain; charset=UTF-8
+
+Ekte imzali fatura ve aylik rapor yer almaktadir.
+Iyi calismalar dileriz.
+
+--ST-BOUNDARY-42
+Content-Type: application/octet-stream; name="gizli-ek.bin"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="gizli-ek.bin"
+
+U0hBUkstVEFOSyBHSVpMSSBFSyBET1NZQVNJCkJ1IGljZXJpayBiYXNlNjQga29kbGFubWlzIGF0
+dGFjaG1lbnQgZ292ZGVzaWRpci4KQW5hbGlzdGUgZ29yZXZpOiBwY2FwJ3RlbiBhdHRhY2htZW50
+J2kga3VydGFybWFrIHZlIGtvZHUgY296bWVrLgoBAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhsc
+HR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1RV
+VldYWVpbXF1eX2BhYmNkZWZnaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gAECAwQFBgcICQoLDA0O
+DxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZH
+SElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+A
+
+--ST-BOUNDARY-42--

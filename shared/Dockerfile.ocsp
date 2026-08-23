@@ -1,0 +1,14 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache openssl
+
+COPY ca/ca.crt /ocsp/ca.crt
+COPY ca/ocsp.key /ocsp/ocsp.key
+COPY ca/ocsp.crt /ocsp/ocsp.crt
+COPY ca/index.txt /ocsp/index.txt
+
+EXPOSE 9080
+
+CMD ["openssl", "ocsp", "-port", "9080", "-index", "/ocsp/index.txt", \
+     "-CA", "/ocsp/ca.crt", "-rkey", "/ocsp/ocsp.key", \
+     "-rsigner", "/ocsp/ocsp.crt"]

@@ -1,0 +1,19 @@
+FROM alpine:3.21
+
+RUN apk add --no-cache \
+    curl \
+    nmap \
+    nmap-scripts \
+    netcat-openbsd \
+    bash \
+    iputils \
+    tcpdump \
+    bind-tools \
+    python3 \
+    krb5 \
+    samba-client \
+    openldap-clients \
+    cyrus-sasl-gssapiv2
+
+WORKDIR /tools
+CMD ["sleep", "infinity"]

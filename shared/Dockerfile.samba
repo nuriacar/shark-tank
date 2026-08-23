@@ -1,0 +1,22 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        samba \
+        winbind \
+        samba-ad-provision \
+        samba-dsdb-modules \
+        samba-vfs-modules \
+        ldb-tools \
+        tcpdump \
+        netcat-openbsd \
+        tini && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    rm -f /etc/samba/smb.conf
+
+COPY entrypoint-ad-dc.sh /entrypoint-ad-dc.sh
+RUN chmod +x /entrypoint-ad-dc.sh
+
+EXPOSE 88 464 389 636 445 135
+
+ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint-ad-dc.sh"]

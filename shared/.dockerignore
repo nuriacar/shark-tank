@@ -1,0 +1,17 @@
+pcaps/
+certs/
+*.pcap
+*.key
+*.crt
+credentials.env
+.vscode/
+.idea/
+.git/
+*.md
+docs/
+module-*/
+scripts/
+.DS_Store
+*.tmp
+*.bak
+*~
